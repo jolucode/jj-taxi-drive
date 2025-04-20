@@ -1,0 +1,20 @@
+{
+  "type": "DRIVER",
+  "name": "John Driver",
+  "password": "securepass123",
+  "phone": "999888777",
+  "email": "john@example.com",
+  "vehicle": {
+    "plate": "ABC123",
+    "model": "Hyundai Accent",
+    "color": "White"
+  }
+}
+
+{
+  "type": "PASSENGER",
+  "name": "Jane Passenger",
+  "password": "supersecret",
+  "phone": "955441122",
+  "email": "jane@example.com"
+}
