@@ -1,0 +1,120 @@
+PARA WEBSOCKET
+https://websocketking.com/
+
+🧭 1. ¿Qué IP debe usar Flutter para conectarse al backend?
+✅ Si tu backend está corriendo en 101.44.1.161, entonces esa es la IP real que deben usar los clientes (Flutter, navegador, etc.).
+👉 En Flutter (ya sea en emulador o celular), la conexión debe ser:
+ws://101.44.1.161:8083/ws/{userId}
+
+
+🌍 3. ¿Cómo entra aquí websocketking.com?
+Es una herramienta que te permite probar WebSocket desde tu navegador.
+
+Si escribes ahí:
+ws://101.44.1.161:8083/ws/662c02ad8653a91f5b3fd9de
+👉 Se conecta a tu backend WebSocket, igual que lo haría Flutter o cualquier app. Puedes recibir los mensajes que el backend envía.
+
+Condiciones para que funcione:
+Que tu backend esté corriendo en 101.44.1.161
+Que sea accesible desde el navegador (sin firewalls, puertos abiertos)
+Que 101.44.1.161 sea la IP pública o accesible desde internet o red local
+
+
+✅ Resumen rápido
+Situación	URL WebSocket que usas
+Backend local, emulador Android	ws://10.0.2.2:8083/ws/{userId}
+Backend local, navegador en la PC	ws://localhost:8083/ws/{userId}
+Backend en otra PC o red local	ws://192.168.X.X:8083/ws/{userId}
+Backend con IP pública real	ws://101.44.1.161:8083/ws/{userId}
+Producción con dominio + HTTPS	wss://api.jjdrive.com/ws/{userId}
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡
+src/main/java/org/jjdrive/
+├── controller/
+│   └── RidePasajeroResource.java
+├── entities/
+│   ├── Ride.java
+│   └── Location.java
+├── repository/
+│   └── RideRepository.java
+
+
+PARA LAS PREUBAS
+1. Levantar docket
+2. Conectarse
+docker exec -it redis redis-cli
+1. LIMPIAR REDIS MENERA AGRESIVA
+ FLUSHALL
+
+
+MONGO CONSULTA RIDES
+db.getCollection("rides").find({})
+LIMPIAR REDIS
+db.rides.deleteMany({})
+LIMPIAR REDIS
+Puedes limpiar Redis con DEL status:* y DEL location:*
+
+
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡
+
+🧭 FLUJO COMPLETO DESDE EL VIAJE HASTA LA RESPUESTA
+🧍‍♂️ 1. El pasajero solicita un viaje
+POST /pasajero/viajes
+
+📤 Envía:
+{
+  "pasajeroId": "idpasajero1",
+  "latOrigen": -12.060,
+  "lngOrigen": -77.035,
+  "latDestino": -12.080,
+  "lngDestino": -77.050,
+  "presupuesto": 15.0
+}
+
+🚗 2. El conductor se conecta al sistema
+POST /conductores/ubicacion
+
+{
+  "userId": "idconductor1",
+  "lat": -12.061,
+  "lng": -77.034
+}
+
+🔁 3. El backend le notifica por WebSocket
+📨 Ejemplo de mensaje que el backend envía a los WebSocket de conductores activos:
+
+📢 ¡Nuevo viaje disponible! ID: 662eabc1234...
+
+
+📄 4. Consulta del estado del viaje
+GET /pasajero/viajes/{rideId}
+
+📌 ¿Qué hace el backend?
+
+Consulta MongoDB por _id
+
+Devuelve el viaje con todos sus campos:
+
+{
+  "rideId": "662eabc1234...",
+  "estado": "BUSCANDO",
+  "pasajeroId": "idpasajero1",
+  "conductorId": null,
+  "origen": {...},
+  "destino": {...},
+  "presupuesto": 15.0
+}
+
+
+🖼️ ¿Cómo dibujarlo?
+Aquí te sugiero el orden en una imagen tipo secuencia o flujo de componentes:
+
+scss
+Copiar
+Editar
+Pasajero ──▶ Backend ──▶ MongoDB     (guardar Ride)
+                      └─▶ Redis      (consultar conductores ONLINE)
+                      └─▶ WebSocket  (notificar conductores)
+
+Conductor ──▶ Backend ──▶ Redis      (guardar estado + ubicación)
+
+Pasajero ──▶ Backend ──▶ MongoDB     (consultar estado del viaje)
