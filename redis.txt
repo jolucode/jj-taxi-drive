@@ -1,0 +1,22 @@
+🔧 PARTE 1: INTEGRAR REDIS EN QUARKUS
+
+✅ Paso 1: Agrega la dependencia en tu pom.xml
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-redis-client</artifactId>
+</dependency>
+
+✅ Paso 2: Configura Redis en application.properties
+quarkus.redis.hosts=redis://localhost:6379
+
+Si estás usando Docker, asegúrate de levantar Redis con:
+docker run -d -p 6379:6379 --name redis redis
+
+
+
+🔌 PARTE 2: WEBSOCKET EN QUARKUS
+✅ Paso 1: Agrega dependencia WebSocket
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-vertx-web</artifactId>
+</dependency>

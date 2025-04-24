@@ -118,3 +118,14 @@ Pasajero ──▶ Backend ──▶ MongoDB     (guardar Ride)
 Conductor ──▶ Backend ──▶ Redis      (guardar estado + ubicación)
 
 Pasajero ──▶ Backend ──▶ MongoDB     (consultar estado del viaje)
+
+
+
+TECNOLOGIAS
+Redis
+
+MongoDB
+
+WebSocket
+
+API REST
