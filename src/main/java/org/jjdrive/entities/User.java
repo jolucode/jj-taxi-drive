@@ -1,7 +1,6 @@
 package org.jjdrive.entities;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.quarkus.mongodb.panache.PanacheMongoEntity;
 import io.quarkus.mongodb.panache.common.MongoEntity;
 import org.bson.types.ObjectId;
@@ -10,7 +9,7 @@ import org.bson.types.ObjectId;
 @MongoEntity(collection = "users")
 public class User extends PanacheMongoEntity {
 
-    @JsonIgnore // 👈 Swagger ya no lo documentará
+    //@JsonIgnore // 👈 Swagger ya no lo documentará
     public ObjectId id;
 
     public UserType type;    // 👈 ahora es enum   // "PASSENGER" or "DRIVER"
@@ -18,6 +17,7 @@ public class User extends PanacheMongoEntity {
     public String password;
     public String phone;
     public String email;
+    public String clientIdPhone;
 
     public Vehicle vehicle;      // Optional: only for DRIVER
 

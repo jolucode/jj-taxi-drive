@@ -8,6 +8,9 @@ import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 import org.jjdrive.entities.User;
 import org.jjdrive.entities.UserType;
+import org.jjdrive.entities.dto.CredentialRequest;
+import org.jjdrive.entities.dto.UserTypeRequest;
+import org.jjdrive.entities.dto.VehicleRequest;
 import org.jjdrive.repository.UserRepository;
 
 @Path("/users")
@@ -27,11 +30,7 @@ public class UserResource {
                 .onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
     }
 
-    @POST
-    public Uni<Response> createReactive(User user) {
-        return repo.persist(user)
-                .onItem().transform(u -> Response.status(Response.Status.CREATED).entity(u).build());
-    }
+
 
     @PUT
     @Path("/{id}")
@@ -80,4 +79,52 @@ public class UserResource {
                     }
                 });
     }
+
+    @POST
+    public Uni<Response> createReactive(User user) {
+        return repo.persist(user)
+                .onItem().transform(u -> Response.status(Response.Status.CREATED).entity(u).build());
+    } //endpoint para crear usuarios con POST /users
+
+    @POST
+    @Path("/auth/login")
+    public Uni<Response> login(CredentialRequest request) {
+        return repo.findByEmail(request.email)
+                .onItem().ifNotNull().transform(user -> {
+                    if (user.password.equals(request.password)) {
+                        return Response.ok(user).build();
+                    } else {
+                        return Response.status(Response.Status.UNAUTHORIZED).entity("Contraseña incorrecta").build();
+                    }
+                })
+                .onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).entity("Usuario no encontrado").build());
+    }
+
+    @PUT
+    @Path("/{id}/type")
+    public Uni<Response> updateType(@PathParam("id") String id, UserTypeRequest request) {
+        return repo.findById(new ObjectId(id))
+                .onItem().ifNotNull().transformToUni(user -> {
+                    user.type = request.type;
+                    return repo.update(user).onItem().transform(u -> Response.ok(u).build());
+                })
+                .onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
+    }
+
+    @PUT
+    @Path("/{id}/vehicle")
+    public Uni<Response> updateVehicle(@PathParam("id") String id, VehicleRequest request) {
+        return repo.findById(new ObjectId(id))
+                .onItem().ifNotNull().transformToUni(user -> {
+                    if (user.type != UserType.DRIVER) {
+                        return Uni.createFrom().item(Response.status(Response.Status.BAD_REQUEST)
+                                .entity("Solo los conductores pueden tener vehículo").build());
+                    }
+                    user.vehicle = request.vehicle;
+                    return repo.update(user).onItem().transform(u -> Response.ok(u).build());
+                })
+                .onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
+    }
+
+
 }
